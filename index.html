@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ولد ولا بنت؟</title>
+<meta name="theme-color" content="#efe7de">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Almarai:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #efe7de;
+    --paper-deep: #e6dbcf;
+    --brown: #6b4423;
+    --brown-soft: #9a7a5f;
+    --pink: #f29bb7;
+    --pink-soft: #fbe1ea;
+    --blue: #8fc4ee;
+    --blue-soft: #e0f0fc;
+    --white: #fffdfa;
+    --display: "Aref Ruqaa", "Amiri", serif;
+    --body: "Almarai", "Tajawal", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    direction: rtl;
+    background: var(--paper);
+    color: var(--brown);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.8;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; border: 0; background: none; }
+
+  /* 9:16 stage — same shape as the artwork, so nothing is ever cropped */
+  .stage {
+    position: relative;
+    width: min(100vw, calc(100dvh * 9 / 16));
+    height: min(100dvh, calc(100vw * 16 / 9));
+    container-type: size;
+    overflow: hidden;
+    background: var(--paper);
+  }
+  @media (min-width: 700px) {
+    body { background: var(--paper-deep); }
+    .stage { border-radius: 28px; box-shadow: 0 30px 80px -30px rgba(107, 68, 35, .45); height: min(96dvh, calc(100vw * 16 / 9)); width: calc(min(96dvh, calc(100vw * 16 / 9)) * 9 / 16); }
+  }
+
+  .screen {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    opacity: 0; visibility: hidden;
+    transform: translateY(14px) scale(.985);
+    transition: opacity .45s ease, transform .55s cubic-bezier(.2,.8,.2,1), visibility 0s .55s;
+  }
+  .screen.on {
+    opacity: 1; visibility: visible; transform: none;
+    transition: opacity .45s ease, transform .55s cubic-bezier(.2,.8,.2,1);
+  }
+
+  /* Full-artwork screens */
+  .art { background: center / 100% 100% no-repeat; width: 100%; cursor: pointer; }
+  .art.cover { background-image: url("assets/cover.jpg"); }
+  .art.guess { background-image: url("assets/guess.jpg"); }
+  .art.ready { background-image: url("assets/ready.jpg"); }
+  .hint {
+    position: absolute; inset-inline: 0; bottom: 3.2cqh;
+    margin-inline: auto; width: max-content; max-width: 86%;
+    padding: 1.3cqh 6cqw;
+    background: rgba(255, 253, 250, .92);
+    border-radius: 999px;
+    font-weight: 700; font-size: 4.2cqw;
+    box-shadow: 0 6px 18px -8px rgba(107, 68, 35, .5);
+    animation: breathe 1.9s ease-in-out infinite;
+  }
+  @keyframes breathe { 50% { transform: translateY(-5px); } }
+
+  /* Question screens */
+  .q { background: var(--paper); }
+  .sky {
+    flex: none; width: 100%; aspect-ratio: 1152 / 620;
+    background: url("assets/cover.jpg") top center / 100% auto no-repeat;
+    -webkit-mask-image: linear-gradient(#000 82%, transparent);
+            mask-image: linear-gradient(#000 82%, transparent);
+  }
+  .q-body {
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 0 7cqw 2cqh;
+    text-align: center;
+  }
+  .steps { display: flex; gap: 1.6cqw; margin-top: -1cqh; }
+  .steps i { width: 6cqw; height: 5px; border-radius: 9px; background: #dccdbd; transition: background .3s; }
+  .steps i.done { background: var(--brown); }
+  .q h2 {
+    font-family: var(--display); font-weight: 700;
+    font-size: 9.4cqw; line-height: 1.5;
+    margin-top: 1.6cqh;
+  }
+  .q p.sub { font-size: 3.9cqw; color: var(--brown-soft); margin-top: .4cqh; }
+  .q-main { flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2cqh; }
+
+  .duo { display: grid; grid-template-columns: 33cqw 33cqw; justify-content: center; gap: 6cqw; direction: ltr; }
+  .pick {
+    position: relative; border-radius: 6cqw; overflow: hidden;
+    background: var(--white);
+    box-shadow: 0 0 0 2px #e3d5c6;
+    transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s;
+    padding-bottom: 1.4cqh;
+  }
+  .pick .bear { display: block; width: 100%; aspect-ratio: 440 / 800; background: url("assets/cover.jpg") no-repeat; background-size: 261.8% 256%; }
+  .pick.boy .bear { background-position: 2.8% 96.2%; }
+  .pick.girl .bear { background-position: 93.4% 96.2%; }
+  .pick span { display: block; font-family: var(--display); font-weight: 700; font-size: 7cqw; line-height: 1.4; direction: rtl; }
+  .pick.boy span { color: #5fa3d6; }
+  .pick.girl span { color: #e8799d; }
+  .pick:active { transform: scale(.97); }
+  .pick[aria-pressed="true"] { transform: translateY(-6px); }
+  .pick.boy[aria-pressed="true"] { box-shadow: 0 0 0 5px var(--blue), 0 18px 30px -16px #5fa3d6; background: var(--blue-soft); }
+  .pick.girl[aria-pressed="true"] { box-shadow: 0 0 0 5px var(--pink), 0 18px 30px -16px #e8799d; background: var(--pink-soft); }
+
+  .field {
+    width: 100%; padding: 2cqh 5cqw;
+    background: var(--white); border: 2px solid #e3d5c6; border-radius: 5cqw;
+    font-size: 5.6cqw; font-weight: 700; text-align: center; outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .field::placeholder { color: #c7b5a3; font-weight: 400; }
+  .field:focus { border-color: var(--brown); box-shadow: 0 0 0 4px rgba(107, 68, 35, .12); }
+
+  .chips { display: flex; flex-direction: column; gap: 1.6cqh; }
+  .chip {
+    width: 100%; padding: 1.9cqh 5cqw;
+    background: var(--white); border-radius: 5cqw;
+    box-shadow: 0 0 0 2px #e3d5c6;
+    font-size: 5.2cqw; font-weight: 700;
+    transition: transform .2s, box-shadow .2s, background .2s;
+  }
+  .chip:active { transform: scale(.98); }
+  .chip[aria-pressed="true"] { background: var(--brown); color: var(--white); box-shadow: 0 0 0 2px var(--brown); }
+
+  .nav { flex: none; width: 100%; display: flex; gap: 3cqw; align-items: center; }
+  .btn {
+    flex: 1; padding: 1.8cqh 4cqw; border-radius: 999px;
+    background: var(--brown); color: var(--white);
+    font-weight: 700; font-size: 4.8cqw;
+    transition: opacity .2s, transform .2s;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn[disabled] { opacity: .35; cursor: default; }
+  .btn.ghost { flex: none; background: none; color: var(--brown-soft); padding-inline: 3cqw; font-weight: 400; }
+  .btn.line { flex: none; background: var(--white); color: var(--brown); box-shadow: 0 0 0 2px #e3d5c6; }
+  :focus-visible { outline: 3px solid var(--brown); outline-offset: 3px; }
+
+  /* Summary */
+  .ticket {
+    width: 100%; background: var(--white); border-radius: 6cqw;
+    box-shadow: 0 0 0 2px #e3d5c6; padding: 1.4cqh 6cqw;
+    text-align: start;
+  }
+  .ticket div { display: flex; justify-content: space-between; align-items: baseline; gap: 4cqw; padding: 1.3cqh 0; }
+  .ticket div + div { border-top: 1.5px dashed #e3d5c6; }
+  .ticket dt { color: var(--brown-soft); font-size: 3.9cqw; }
+  .ticket dd { font-weight: 700; font-size: 5cqw; overflow-wrap: anywhere; }
+  .ticket dd.boy { color: #5fa3d6; } .ticket dd.girl { color: #e8799d; }
+
+  /* Countdown */
+  .count {
+    position: absolute; inset: 0; display: none; place-items: center;
+    background: rgba(239, 231, 222, .78); backdrop-filter: blur(6px);
+  }
+  .count.on { display: grid; }
+  .count b {
+    font-family: var(--display); font-size: 46cqw; line-height: 1; color: var(--brown);
+    animation: pop 1s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes pop { 0% { transform: scale(.3); opacity: 0; } 35% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.25); opacity: 0; } }
+
+  /* Reveal video */
+  .reveal { background: #1b130c; justify-content: center; }
+  .reveal video { width: 100%; height: 100%; object-fit: contain; background: #1b130c; }
+  .slot {
+    position: absolute; inset: 16cqw 5cqw 5cqw; border: 3px dashed rgba(255, 253, 250, .45); border-radius: 6cqw;
+    display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1.5cqh;
+    color: var(--white); text-align: center; padding: 6cqw;
+  }
+  .slot.on { display: flex; }
+  .slot svg { width: 20cqw; height: 20cqw; }
+  .slot h3 { font-family: var(--display); font-size: 9cqw; line-height: 1.5; }
+  .slot p { font-size: 3.9cqw; opacity: .8; }
+  .slot code { direction: ltr; unicode-bidi: isolate; font-size: 3.6cqw; background: rgba(255,255,255,.14); padding: .3cqh 2cqw; border-radius: 2cqw; }
+  .again { position: absolute; top: 2cqh; inset-inline-start: 4cqw; color: rgba(255,253,250,.8); font-size: 3.6cqw; padding: 1cqh 3cqw; background: rgba(0,0,0,.35); border-radius: 999px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<main class="stage" id="stage">
+
+  <!-- 1 · الغلاف -->
+  <section class="screen art cover on" data-screen="cover" role="button" tabindex="0" aria-label="أنا ولد ولا بنت؟ اضغط للبدء">
+    <span class="hint">اضغطوا للبدء</span>
+  </section>
+
+  <!-- 2 · توقعاتكم -->
+  <section class="screen art guess" data-screen="guess" role="button" tabindex="0" aria-label="توقعاتكم! اضغط للمتابعة">
+    <span class="hint">يلا نشوف توقعاتكم</span>
+  </section>
+
+  <!-- 3 · ولد ولا بنت -->
+  <section class="screen q" data-screen="q1">
+    <div class="sky"></div>
+    <div class="q-body">
+      <div class="steps"><i class="done"></i><i></i><i></i><i></i></div>
+      <h2>شو متوقعين؟</h2>
+      <p class="sub">اختاروا الدبدوب اللي حاسّين فيه</p>
+      <div class="q-main">
+        <div class="duo">
+          <button class="pick boy" data-key="gender" data-value="ولد" aria-pressed="false"><i class="bear"></i><span>ولد</span></button>
+          <button class="pick girl" data-key="gender" data-value="بنت" aria-pressed="false"><i class="bear"></i><span>بنت</span></button>
+        </div>
+      </div>
+      <div class="nav"><button class="btn" data-next disabled>التالي</button></div>
+    </div>
+  </section>
+
+  <!-- 4 · الاسم -->
+  <section class="screen q" data-screen="q2">
+    <div class="sky"></div>
+    <div class="q-body">
+      <div class="steps"><i class="done"></i><i class="done"></i><i></i><i></i></div>
+      <h2>شو الاسم اللي متوقعينه؟</h2>
+      <p class="sub">اكتبوا أول اسم خطر ببالكم</p>
+      <div class="q-main">
+        <input class="field" data-key="name" type="text" maxlength="24" autocomplete="off" placeholder="الاسم المتوقع" aria-label="الاسم المتوقع">
+      </div>
+      <div class="nav"><button class="btn ghost" data-back>رجوع</button><button class="btn" data-next disabled>التالي</button></div>
+    </div>
+  </section>
+
+  <!-- 5 · الشبه -->
+  <section class="screen q" data-screen="q3">
+    <div class="sky"></div>
+    <div class="q-body">
+      <div class="steps"><i class="done"></i><i class="done"></i><i class="done"></i><i></i></div>
+      <h2>لمين رح يطلع شبه؟</h2>
+      <p class="sub">توقع واحد بس</p>
+      <div class="q-main">
+        <div class="chips">
+          <button class="chip" data-key="looks" data-value="ماما" aria-pressed="false">ماما</button>
+          <button class="chip" data-key="looks" data-value="بابا" aria-pressed="false">بابا</button>
+          <button class="chip" data-key="looks" data-value="خليط من التنين" aria-pressed="false">خليط من التنين</button>
+        </div>
+      </div>
+      <div class="nav"><button class="btn ghost" data-back>رجوع</button><button class="btn" data-next disabled>التالي</button></div>
+    </div>
+  </section>
+
+  <!-- 6 · اسم الضيف -->
+  <section class="screen q" data-screen="q4">
+    <div class="sky"></div>
+    <div class="q-body">
+      <div class="steps"><i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i></div>
+      <h2>ومين صاحب التوقع؟</h2>
+      <p class="sub">عشان نعرف مين اللي توقّع صح</p>
+      <div class="q-main">
+        <input class="field" data-key="guest" type="text" maxlength="24" autocomplete="off" placeholder="اسمك" aria-label="اسمك">
+      </div>
+      <div class="nav"><button class="btn ghost" data-back>رجوع</button><button class="btn" data-next disabled>شوفوا توقعي</button></div>
+    </div>
+  </section>
+
+  <!-- 7 · ملخص التوقع -->
+  <section class="screen q" data-screen="summary">
+    <div class="sky"></div>
+    <div class="q-body">
+      <h2 id="sumTitle">توقعك</h2>
+      <div class="q-main">
+        <dl class="ticket">
+          <div><dt>ولد ولا بنت</dt><dd id="sGender"></dd></div>
+          <div><dt>الاسم</dt><dd id="sName"></dd></div>
+          <div><dt>الشبه</dt><dd id="sLooks"></dd></div>
+        </dl>
+        <button class="btn line" id="share">ابعت توقعك عالواتساب</button>
+      </div>
+      <div class="nav"><button class="btn ghost" data-back>تعديل</button><button class="btn" data-next>يلا نعرف الجواب</button></div>
+    </div>
+  </section>
+
+  <!-- 8 · مستعدين -->
+  <section class="screen art ready" data-screen="ready" role="button" tabindex="0" aria-label="مستعدين؟ اضغط للكشف">
+    <span class="hint">اضغطوا للكشف</span>
+    <div class="count" id="count" aria-live="assertive"></div>
+  </section>
+
+  <!-- 9 · فيديو الكشف -->
+  <section class="screen reveal" data-screen="reveal">
+    <video id="video" playsinline controls preload="metadata" src="assets/reveal.mp4"></video>
+    <div class="slot" id="slot">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="9" width="38" height="30" rx="6"/><path d="M20 17.5v13l11-6.5z" fill="currentColor"/></svg>
+      <h3>هون فيديو الكشف</h3>
+      <p>الفيديو لسا ما انضاف. لما يجهز بينحط بهالاسم:</p>
+      <code>assets/reveal.mp4</code>
+    </div>
+    <button class="again" id="again">من الأول</button>
+  </section>
+
+</main>
+
+<script>
+(() => {
+  const order = ['cover', 'guess', 'q1', 'q2', 'q3', 'q4', 'summary', 'ready', 'reveal'];
+  const screens = Object.fromEntries([...document.querySelectorAll('.screen')].map(s => [s.dataset.screen, s]));
+  const answers = { gender: '', name: '', looks: '', guest: '' };
+  const video = document.getElementById('video');
+  const slot = document.getElementById('slot');
+  const count = document.getElementById('count');
+  let current = 'cover', counting = false, hasVideo = true;
+
+  function go(name) {
+    screens[current].classList.remove('on');
+    current = name;
+    screens[current].classList.add('on');
+    if (name === 'summary') fillSummary();
+    const field = screens[name].querySelector('.field');
+    if (field) setTimeout(() => field.focus({ preventScroll: true }), 500);
+  }
+  const step = d => go(order[order.indexOf(current) + d]);
+
+  // Full-artwork screens advance on tap
+  ['cover', 'guess'].forEach(n => {
+    screens[n].addEventListener('click', () => step(1));
+    screens[n].addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); step(1); } });
+  });
+
+  // Choices
+  document.querySelectorAll('[data-value]').forEach(btn => btn.addEventListener('click', () => {
+    const key = btn.dataset.key;
+    answers[key] = btn.dataset.value;
+    btn.closest('.screen').querySelectorAll(`[data-key="${key}"]`).forEach(b => b.setAttribute('aria-pressed', b === btn));
+    btn.closest('.screen').querySelector('[data-next]').disabled = false;
+  }));
+
+  // Text fields
+  document.querySelectorAll('.field').forEach(input => {
+    const next = input.closest('.screen').querySelector('[data-next]');
+    input.addEventListener('input', () => {
+      answers[input.dataset.key] = input.value.trim();
+      next.disabled = !answers[input.dataset.key];
+    });
+    input.addEventListener('keydown', e => { if (e.key === 'Enter' && !next.disabled) { input.blur(); step(1); } });
+  });
+
+  document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => step(1)));
+  document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => step(-1)));
+
+  function fillSummary() {
+    document.getElementById('sumTitle').textContent = 'توقع ' + answers.guest;
+    const g = document.getElementById('sGender');
+    g.textContent = answers.gender;
+    g.className = answers.gender === 'ولد' ? 'boy' : 'girl';
+    document.getElementById('sName').textContent = answers.name;
+    document.getElementById('sLooks').textContent = answers.looks;
+  }
+
+  document.getElementById('share').addEventListener('click', () => {
+    const text = `توقعي للبيبي 🧸\nأنا: ${answers.guest}\nولد ولا بنت: ${answers.gender}\nالاسم: ${answers.name}\nالشبه: ${answers.looks}`;
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
+  });
+
+  // Ready → 3·2·1 → video
+  video.addEventListener('error', () => { hasVideo = false; video.hidden = true; slot.classList.add('on'); });
+
+  function startCountdown() {
+    if (counting) return;
+    counting = true;
+    // Unlock playback inside the tap, so the video can start with sound after the countdown
+    if (hasVideo) { video.muted = true; video.play().then(() => { video.pause(); video.currentTime = 0; video.muted = false; }).catch(() => {}); }
+    screens.ready.querySelector('.hint').hidden = true;
+    count.classList.add('on');
+    let n = 3;
+    const tick = () => {
+      if (n === 0) {
+        count.classList.remove('on'); count.innerHTML = '';
+        counting = false;
+        go('reveal');
+        if (hasVideo) video.play().catch(() => {});
+        return;
+      }
+      count.innerHTML = `<b>${n}</b>`;
+      n--;
+      setTimeout(tick, 1000);
+    };
+    tick();
+  }
+  screens.ready.addEventListener('click', startCountdown);
+  screens.ready.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startCountdown(); } });
+
+  document.getElementById('again').addEventListener('click', () => {
+    video.pause();
+    screens.ready.querySelector('.hint').hidden = false;
+    go('cover');
+  });
+
+  // Test hook: open any screen directly with #name
+  const jump = location.hash.slice(1);
+  if (screens[jump]) go(jump);
+})();
+</script>
+</body>
+</html>
